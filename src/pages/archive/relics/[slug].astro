@@ -30,6 +30,10 @@ const rarityLabels: Record<Relic["rarity"], string> = {
 };
 
 const rarityLabel = rarityLabels[relic.rarity];
+const hasExtendedArchive =
+  Boolean(relic.archiveEntry) ||
+  Boolean(relic.curatorNote) ||
+  Boolean(relic.historicalInterpretation);
 ---
 
 <BaseLayout
@@ -37,29 +41,29 @@ const rarityLabel = rarityLabels[relic.rarity];
   description={relic.appDescription}
 >
   <a
-    class="back-link"
+    class='back-link'
     href={`/archive/civilisations/${relic.civilisationSlug}`}
   >
     ← Return to {civilisation?.name ?? "the Archive"}
   </a>
 
-  <article class="relic-record">
+  <article class='relic-record'>
     <div
       class={`artwork rarity-${relic.rarity}`}
-      role="img"
+      role='img'
       aria-label={relic.altText}
     >
       <span>Artwork awaiting restoration</span>
     </div>
 
-    <div class="relic-information">
-      <p class="eyebrow">
+    <div class='relic-information'>
+      <p class='eyebrow'>
         {civilisation?.name ?? "Unknown civilisation"}
       </p>
 
       <h1>{relic.name}</h1>
 
-      <dl class="metadata">
+      <dl class='metadata'>
         <div>
           <dt>Collection record</dt>
           <dd>{String(relic.collectionNumber).padStart(2, "0")}</dd>
@@ -76,31 +80,41 @@ const rarityLabel = rarityLabels[relic.rarity];
         </div>
       </dl>
 
-      <p class="description">{relic.appDescription}</p>
+      <p class='description'>{relic.appDescription}</p>
     </div>
   </article>
 
-  <section class="archive-sections">
-    <details open>
-      <summary>Archive entry</summary>
-      <p>{relic.archiveEntry}</p>
-    </details>
+  {
+    hasExtendedArchive && (
+      <section class='archive-sections'>
+        {relic.archiveEntry && (
+          <details open>
+            <summary>Archive entry</summary>
+            <p>{relic.archiveEntry}</p>
+          </details>
+        )}
 
-    <details>
-      <summary>Curator note</summary>
-      <p>{relic.curatorNote}</p>
-    </details>
+        {relic.curatorNote && (
+          <details>
+            <summary>Curator note</summary>
+            <p>{relic.curatorNote}</p>
+          </details>
+        )}
 
-    <details>
-      <summary>Historical interpretation</summary>
-      <p>{relic.historicalInterpretation}</p>
-    </details>
-  </section>
+        {relic.historicalInterpretation && (
+          <details>
+            <summary>Historical interpretation</summary>
+            <p>{relic.historicalInterpretation}</p>
+          </details>
+        )}
+      </section>
+    )
+  }
 
   {
     relic.routeHint && (
-      <section class="route-hint">
-        <p class="eyebrow">Recovery affinity</p>
+      <section class='route-hint'>
+        <p class='eyebrow'>Recovery affinity</p>
         <h2>Where this relic may be encountered</h2>
         <p>{relic.routeHint}</p>
       </section>
