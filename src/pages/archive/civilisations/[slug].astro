@@ -201,25 +201,8 @@ const civilisationRelics = getRelicsForCivilisation(civilisation.slug);
     color: var(--colour-text);
   }
 
-  .relic-preview {
-    margin-top: clamp(5rem, 12vw, 9rem);
-    padding: clamp(2rem, 5vw, 4rem);
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.7fr);
-    gap: 3rem;
-    border: 1px solid var(--colour-border);
-    border-radius: 0.5rem;
-    background: var(--colour-surface);
-  }
-
-  .relic-preview h2,
-  .relic-preview p:last-child {
-    margin-bottom: 0;
-  }
-
   @media (max-width: 48rem) {
-    .record,
-    .relic-preview {
+    .record {
       grid-template-columns: 1fr;
     }
 
