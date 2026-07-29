@@ -8,26 +8,28 @@ interface Props {
   relics: Relic[];
 }
 
-const {
-  civilisationName,
-  expectedRelicCount,
-  relics,
-} = Astro.props;
+const { civilisationName, expectedRelicCount, relics } = Astro.props;
+const isComplete = relics.length === expectedRelicCount;
 ---
 
-<section class="collection" aria-labelledby="collection-heading">
-  <div class="section-heading">
-    <p class="eyebrow">Collection catalogue</p>
+<section class='collection' aria-labelledby='collection-heading'>
+  <div class='section-heading'>
+    <p class='eyebrow'>Collection catalogue</p>
 
-    <h2 id="collection-heading">
+    <h2 id='collection-heading'>
       {expectedRelicCount} relic records
     </h2>
 
     {
-      relics.length > 0 ? (
+      isComplete ? (
         <p>
-          {relics.length} of {expectedRelicCount} records from
-          {" "}{civilisationName} are currently available in the public archive.
+          All {expectedRelicCount} records from {civilisationName} are available
+          in the public archive.
+        </p>
+      ) : relics.length > 0 ? (
+        <p>
+          {relics.length} of {expectedRelicCount} records from{" "}
+          {civilisationName} are currently available in the public archive.
         </p>
       ) : (
         <p>
@@ -39,20 +41,18 @@ const {
 
   {
     relics.length > 0 ? (
-      <div class="relic-grid">
-        {
-          relics.map((relic) => (
-            <RelicCard relic={relic} />
-          ))
-        }
+      <div class='relic-grid'>
+        {relics.map((relic) => (
+          <RelicCard relic={relic} />
+        ))}
       </div>
     ) : (
-      <div class="empty-state">
+      <div class='empty-state'>
         <strong>Archive records awaiting import</strong>
 
         <p>
-          Individual relic entries will appear here when the shared catalogue
-          is imported from the canonical Relicbound dataset.
+          Individual relic entries will appear here when the shared catalogue is
+          imported from the canonical Relicbound dataset.
         </p>
       </div>
     )
