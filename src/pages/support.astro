@@ -1,0 +1,242 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const questions = [
+  {
+    question: "Why does Relicbound need location access?",
+    answer:
+      "Location access is used to find nearby walking destinations, calculate pedestrian routes and measure distance during an active expedition.",
+  },
+  {
+    question: "Does Relicbound track me when I am not walking?",
+    answer:
+      "No. Background location tracking is only intended to operate during an active expedition and stops when that expedition is completed or abandoned.",
+  },
+  {
+    question: "Why did an expedition stop recording?",
+    answer:
+      "Tracking can be interrupted by location permissions, poor GPS reception, Low Power Mode or the application being terminated. Relicbound attempts to preserve and recover active expedition progress.",
+  },
+  {
+    question: "Why did Apple Maps choose a different route?",
+    answer:
+      "Apple Maps controls the final walking directions and may recalculate them according to current map data, closures or your position.",
+  },
+  {
+    question: "Can I abandon an expedition?",
+    answer:
+      "Yes. Expeditions can be abandoned at any time without losing previously collected relics or museum progress.",
+  },
+  {
+    question: "Are suggested routes guaranteed to be accessible?",
+    answer:
+      "No. Relicbound validates that Apple Maps can generate a pedestrian route, but access conditions can change. Follow local signs and never enter private, closed or unsafe areas.",
+  },
+  {
+    question: "How do duplicate relics work?",
+    answer:
+      "Duplicate discoveries are converted into Restoration Fragments. Rarer relics and better-condition duplicates provide more fragments.",
+  },
+  {
+    question: "How do I restore a relic?",
+    answer:
+      "Open a discovered relic in the Museum and use Restoration Fragments to improve its condition. Higher condition levels reveal additional archive information.",
+  },
+  {
+    question: "Does Relicbound require an account?",
+    answer:
+      "No. Collection progress and expedition records are stored locally on your device.",
+  },
+  {
+    question: "Can Relicbound be used outside the UK?",
+    answer:
+      "Relicbound is intended to work anywhere Apple Maps provides suitable pedestrian routes and nearby points of interest, although launch testing will initially focus on the UK.",
+  },
+];
+---
+
+<BaseLayout
+  title="Support | Relicbound"
+  description="Help, troubleshooting and support information for Relicbound."
+>
+  <section class="page-header">
+    <p class="eyebrow">Help and troubleshooting</p>
+    <h1>Relicbound Support</h1>
+    <p class="introduction">
+      Find answers about expedition tracking, walking routes, relic restoration
+      and local game data.
+    </p>
+  </section>
+
+  <section class="questions" aria-labelledby="questions-heading">
+    <div class="section-heading">
+      <p class="eyebrow">Common questions</p>
+      <h2 id="questions-heading">Before contacting support</h2>
+    </div>
+
+    <div class="question-list">
+      {
+        questions.map((item) => (
+          <details>
+            <summary>{item.question}</summary>
+            <p>{item.answer}</p>
+          </details>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="contact">
+    <div>
+      <p class="eyebrow">Contact</p>
+      <h2>Report a problem</h2>
+    </div>
+
+    <div>
+      <p>
+        The public support email address will be added before the external
+        TestFlight release.
+      </p>
+
+      <p>When reporting an expedition problem, include:</p>
+
+      <ul>
+        <li>Your iPhone model</li>
+        <li>Your iOS version</li>
+        <li>The approximate area</li>
+        <li>The selected expedition type</li>
+        <li>Whether Apple Maps or the phone lock screen was open</li>
+        <li>A description of what happened</li>
+      </ul>
+
+      <p>Do not send your precise home address or a detailed GPS trail.</p>
+    </div>
+  </section>
+
+  <section class="limitation">
+    <p class="eyebrow">Known limitation</p>
+    <h2>Walking directions depend on Apple Maps.</h2>
+    <p>
+      Route availability and accuracy depend on Apple Maps data, current access
+      conditions, network connectivity and device location accuracy.
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-header {
+    max-width: 52rem;
+    margin-bottom: clamp(4rem, 10vw, 7rem);
+  }
+
+  .eyebrow {
+    margin-bottom: 1rem;
+    color: var(--colour-accent-bright);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin-bottom: 1.5rem;
+  }
+
+  .introduction {
+    font-size: clamp(1.05rem, 2vw, 1.3rem);
+  }
+
+  .section-heading {
+    max-width: 42rem;
+    margin-bottom: 2rem;
+  }
+
+  .question-list {
+    border-top: 1px solid var(--colour-border);
+  }
+
+  details {
+    border-bottom: 1px solid var(--colour-border);
+  }
+
+  summary {
+    padding: 1.5rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+    color: var(--colour-text);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(1.1rem, 2vw, 1.35rem);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary::after {
+    content: "+";
+    flex: 0 0 auto;
+    color: var(--colour-accent);
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+  }
+
+  details[open] summary::after {
+    content: "−";
+  }
+
+  details p {
+    max-width: 48rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .contact {
+    margin-top: clamp(5rem, 12vw, 9rem);
+    padding: clamp(2rem, 5vw, 4rem);
+    display: grid;
+    grid-template-columns: minmax(0, 0.7fr) minmax(18rem, 1fr);
+    gap: clamp(2rem, 7vw, 6rem);
+    border: 1px solid var(--colour-border);
+    border-radius: 0.5rem;
+    background: var(--colour-surface);
+  }
+
+  .contact h2 {
+    margin-bottom: 0;
+  }
+
+  .contact ul {
+    margin: 0 0 1.5rem;
+    padding-left: 1.25rem;
+    color: var(--colour-text-muted);
+  }
+
+  .contact li + li {
+    margin-top: 0.35rem;
+  }
+
+  .contact p:last-child {
+    margin-bottom: 0;
+  }
+
+  .limitation {
+    margin-top: clamp(4rem, 10vw, 7rem);
+    padding-top: clamp(3rem, 8vw, 5rem);
+    border-top: 1px solid var(--colour-border);
+  }
+
+  .limitation h2 {
+    max-width: 18ch;
+    margin-bottom: 1.25rem;
+  }
+
+  @media (max-width: 44rem) {
+    .contact {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

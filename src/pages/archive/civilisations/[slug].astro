@@ -1,0 +1,236 @@
+---
+import type { Civilisation } from "../../../data/civilisations";
+import { civilisations } from "../../../data/civilisations";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import CivilisationRelicGrid from "../../../components/CivilisationRelicGrid.astro";
+import { getRelicsForCivilisation } from "../../../data/relics";
+
+export function getStaticPaths() {
+  return civilisations.map((civilisation) => ({
+    params: {
+      slug: civilisation.slug,
+    },
+    props: {
+      civilisation,
+    },
+  }));
+}
+
+interface Props {
+  civilisation: Civilisation;
+}
+
+const { civilisation } = Astro.props;
+const civilisationRelics = getRelicsForCivilisation(civilisation.slug);
+---
+
+<BaseLayout
+  title={`${civilisation.name} | The Relicbound Archive`}
+  description={`${civilisation.theme}. Explore its history, route environments and relic collection.`}
+>
+  <a class="back-link" href="/archive">← Return to the Archive</a>
+
+  <section class="hero">
+    <p class="eyebrow">Lost civilisation</p>
+
+    <h1>{civilisation.name}</h1>
+
+    <p class="theme">{civilisation.theme}</p>
+  </section>
+
+  <section class="record">
+    <div class="history">
+      <p class="eyebrow">Known history</p>
+
+      {
+        civilisation.introduction.map((paragraph) => (
+          <p>{paragraph}</p>
+        ))
+      }
+    </div>
+
+    <dl class="collection-summary">
+      <div>
+        <dt>Relics</dt>
+        <dd>{civilisation.relicCount}</dd>
+      </div>
+
+      <div>
+        <dt>Centrepieces</dt>
+        <dd>{civilisation.centrepieceCount}</dd>
+      </div>
+
+      <div>
+        <dt>Archive status</dt>
+        <dd>In reconstruction</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="environments">
+    <div class="section-heading">
+      <p class="eyebrow">Route affinity</p>
+      <h2>Where traces are most often recovered</h2>
+      <p>
+        Expeditions passing through these environments are more likely to
+        recover cases associated with {civilisation.name}.
+      </p>
+    </div>
+
+    <ul>
+      {
+        civilisation.routeEnvironments.map((environment) => (
+          <li>{environment}</li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <CivilisationRelicGrid
+    civilisationName={civilisation.name}
+    expectedRelicCount={civilisation.relicCount}
+    relics={civilisationRelics}
+  />
+</BaseLayout>
+
+<style>
+  .back-link {
+    display: inline-flex;
+    margin-bottom: clamp(3rem, 8vw, 6rem);
+    color: var(--colour-text-muted);
+    font-size: 0.9rem;
+    transition: color 160ms ease;
+  }
+
+  .back-link:hover {
+    color: var(--colour-accent-bright);
+  }
+
+  .hero {
+    max-width: 58rem;
+    margin-bottom: clamp(4rem, 10vw, 7rem);
+  }
+
+  .eyebrow {
+    margin-bottom: 1rem;
+    color: var(--colour-accent-bright);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin-bottom: 1.5rem;
+  }
+
+  .theme {
+    max-width: 42rem;
+    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+  }
+
+  .record {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(17rem, 0.6fr);
+    gap: clamp(2rem, 7vw, 6rem);
+    align-items: start;
+  }
+
+  .history > p:not(.eyebrow) {
+    font-size: clamp(1rem, 2vw, 1.15rem);
+  }
+
+  .collection-summary {
+    margin: 0;
+    border: 1px solid var(--colour-border);
+    border-radius: 0.5rem;
+    background: var(--colour-surface);
+  }
+
+  .collection-summary div {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .collection-summary div + div {
+    border-top: 1px solid var(--colour-border);
+  }
+
+  .collection-summary dt {
+    margin-bottom: 0.35rem;
+    color: var(--colour-text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .collection-summary dd {
+    margin: 0;
+    color: var(--colour-text);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.5rem;
+  }
+
+  .environments {
+    margin-top: clamp(5rem, 12vw, 9rem);
+  }
+
+  .section-heading {
+    max-width: 46rem;
+    margin-bottom: 2rem;
+  }
+
+  .section-heading h2 {
+    margin-bottom: 1.25rem;
+  }
+
+  .environments ul {
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+    list-style: none;
+  }
+
+  .environments li {
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--colour-border);
+    border-radius: 0.35rem;
+    background: var(--colour-surface);
+    color: var(--colour-text);
+  }
+
+  .relic-preview {
+    margin-top: clamp(5rem, 12vw, 9rem);
+    padding: clamp(2rem, 5vw, 4rem);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.7fr);
+    gap: 3rem;
+    border: 1px solid var(--colour-border);
+    border-radius: 0.5rem;
+    background: var(--colour-surface);
+  }
+
+  .relic-preview h2,
+  .relic-preview p:last-child {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 48rem) {
+    .record,
+    .relic-preview {
+      grid-template-columns: 1fr;
+    }
+
+    .environments ul {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 32rem) {
+    .environments ul {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

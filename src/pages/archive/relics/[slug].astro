@@ -1,0 +1,266 @@
+---
+import type { Relic } from "../../../data/relics";
+import { relics } from "../../../data/relics";
+import { getCivilisation } from "../../../data/civilisations";
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+
+export function getStaticPaths() {
+  return relics.map((relic) => ({
+    params: {
+      slug: relic.slug,
+    },
+    props: {
+      relic,
+    },
+  }));
+}
+
+interface Props {
+  relic: Relic;
+}
+
+const { relic } = Astro.props;
+const civilisation = getCivilisation(relic.civilisationSlug);
+
+const rarityLabels: Record<Relic["rarity"], string> = {
+  common: "Common",
+  uncommon: "Uncommon",
+  rare: "Rare",
+  centrepiece: "Centrepiece",
+};
+
+const rarityLabel = rarityLabels[relic.rarity];
+---
+
+<BaseLayout
+  title={`${relic.name} | The Relicbound Archive`}
+  description={relic.appDescription}
+>
+  <a
+    class="back-link"
+    href={`/archive/civilisations/${relic.civilisationSlug}`}
+  >
+    ← Return to {civilisation?.name ?? "the Archive"}
+  </a>
+
+  <article class="relic-record">
+    <div
+      class={`artwork rarity-${relic.rarity}`}
+      role="img"
+      aria-label={relic.altText}
+    >
+      <span>Artwork awaiting restoration</span>
+    </div>
+
+    <div class="relic-information">
+      <p class="eyebrow">
+        {civilisation?.name ?? "Unknown civilisation"}
+      </p>
+
+      <h1>{relic.name}</h1>
+
+      <dl class="metadata">
+        <div>
+          <dt>Collection record</dt>
+          <dd>{String(relic.collectionNumber).padStart(2, "0")}</dd>
+        </div>
+
+        <div>
+          <dt>Rarity</dt>
+          <dd>{rarityLabel}</dd>
+        </div>
+
+        <div>
+          <dt>Category</dt>
+          <dd>{relic.category}</dd>
+        </div>
+      </dl>
+
+      <p class="description">{relic.appDescription}</p>
+    </div>
+  </article>
+
+  <section class="archive-sections">
+    <details open>
+      <summary>Archive entry</summary>
+      <p>{relic.archiveEntry}</p>
+    </details>
+
+    <details>
+      <summary>Curator note</summary>
+      <p>{relic.curatorNote}</p>
+    </details>
+
+    <details>
+      <summary>Historical interpretation</summary>
+      <p>{relic.historicalInterpretation}</p>
+    </details>
+  </section>
+
+  {
+    relic.routeHint && (
+      <section class="route-hint">
+        <p class="eyebrow">Recovery affinity</p>
+        <h2>Where this relic may be encountered</h2>
+        <p>{relic.routeHint}</p>
+      </section>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .back-link {
+    display: inline-flex;
+    margin-bottom: clamp(3rem, 8vw, 6rem);
+    color: var(--colour-text-muted);
+    font-size: 0.9rem;
+    transition: color 160ms ease;
+  }
+
+  .back-link:hover {
+    color: var(--colour-accent-bright);
+  }
+
+  .relic-record {
+    display: grid;
+    grid-template-columns: minmax(18rem, 0.85fr) minmax(0, 1.15fr);
+    gap: clamp(2.5rem, 8vw, 7rem);
+    align-items: center;
+  }
+
+  .artwork {
+    aspect-ratio: 1;
+    padding: 2rem;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--colour-border);
+    border-radius: 0.75rem;
+    background:
+      radial-gradient(
+        circle at 50% 42%,
+        rgba(202, 169, 104, 0.13),
+        transparent 52%
+      ),
+      var(--colour-surface);
+    color: var(--colour-text-muted);
+    text-align: center;
+  }
+
+  .rarity-uncommon {
+    border-color: rgba(202, 169, 104, 0.55);
+  }
+
+  .rarity-rare {
+    border-color: rgba(226, 201, 143, 0.8);
+    box-shadow: 0 0 3rem rgba(202, 169, 104, 0.1);
+  }
+
+  .rarity-centrepiece {
+    border-color: var(--colour-accent-bright);
+    box-shadow: 0 0 4rem rgba(202, 169, 104, 0.18);
+  }
+
+  .eyebrow {
+    margin-bottom: 1rem;
+    color: var(--colour-accent-bright);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin-bottom: 2rem;
+  }
+
+  .metadata {
+    margin: 0 0 2rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-block: 1px solid var(--colour-border);
+  }
+
+  .metadata div {
+    padding: 1rem 0;
+  }
+
+  .metadata div + div {
+    padding-left: 1rem;
+    border-left: 1px solid var(--colour-border);
+  }
+
+  .metadata dt {
+    margin-bottom: 0.35rem;
+    color: var(--colour-text-muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .metadata dd {
+    margin: 0;
+    color: var(--colour-text);
+  }
+
+  .description {
+    margin-bottom: 0;
+    font-size: clamp(1.05rem, 2vw, 1.25rem);
+  }
+
+  .archive-sections {
+    margin-top: clamp(5rem, 12vw, 9rem);
+    border-top: 1px solid var(--colour-border);
+  }
+
+  details {
+    border-bottom: 1px solid var(--colour-border);
+  }
+
+  summary {
+    padding: 1.5rem 0;
+    color: var(--colour-text);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(1.25rem, 3vw, 1.75rem);
+    cursor: pointer;
+  }
+
+  details p {
+    max-width: 52rem;
+    padding-bottom: 1.5rem;
+  }
+
+  .route-hint {
+    margin-top: clamp(4rem, 10vw, 7rem);
+    padding: clamp(2rem, 5vw, 4rem);
+    border: 1px solid var(--colour-border);
+    border-radius: 0.5rem;
+    background: var(--colour-surface);
+  }
+
+  .route-hint h2 {
+    margin-bottom: 1rem;
+  }
+
+  .route-hint p:last-child {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 48rem) {
+    .relic-record {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 34rem) {
+    .metadata {
+      grid-template-columns: 1fr;
+    }
+
+    .metadata div + div {
+      padding-left: 0;
+      border-top: 1px solid var(--colour-border);
+      border-left: 0;
+    }
+  }
+</style>

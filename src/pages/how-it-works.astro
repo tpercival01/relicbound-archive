@@ -1,0 +1,170 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="How Relicbound Works"
+  description="Choose a nearby expedition, complete the walk and recover relics for your museum."
+>
+  <section class="page-header">
+    <p class="eyebrow">How it works</p>
+    <h1>Turn an ordinary walk into an expedition.</h1>
+    <p class="introduction">
+      Relicbound removes the difficult part of deciding where to walk, then
+      rewards the completed route with discoveries for a persistent museum.
+    </p>
+  </section>
+
+  <section class="steps" aria-label="Relicbound game loop">
+    <article>
+      <span>01</span>
+      <h2>Choose your time</h2>
+      <p>
+        Select a Quick, Standard, Long or Extended Expedition based on how
+        much time you have available.
+      </p>
+    </article>
+
+    <article>
+      <span>02</span>
+      <h2>Compare destinations</h2>
+      <p>
+        Relicbound searches for nearby points of interest and checks that
+        Apple Maps can provide a pedestrian route.
+      </p>
+    </article>
+
+    <article>
+      <span>03</span>
+      <h2>Complete the walk</h2>
+      <p>
+        Follow walking directions while Relicbound records the active
+        expedition, including distance and duration.
+      </p>
+    </article>
+
+    <article>
+      <span>04</span>
+      <h2>Recover sealed cases</h2>
+      <p>
+        Completed expeditions award between one and four cases. Longer walks
+        recover more cases.
+      </p>
+    </article>
+
+    <article>
+      <span>05</span>
+      <h2>Build your museum</h2>
+      <p>
+        Discover 105 relics from four lost civilisations, increase your museum
+        rank and complete each collection.
+      </p>
+    </article>
+
+    <article>
+      <span>06</span>
+      <h2>Restore damaged relics</h2>
+      <p>
+        Duplicate discoveries become Restoration Fragments, which improve
+        relic condition and reveal additional archive lore.
+      </p>
+    </article>
+  </section>
+
+  <section class="privacy">
+    <p class="eyebrow">Designed around privacy</p>
+    <h2>Your expeditions remain on your device.</h2>
+    <p>
+      Relicbound requires no account and does not upload your walking history.
+      Detailed GPS trails are not retained after an expedition.
+    </p>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-header {
+    max-width: 52rem;
+    margin-bottom: clamp(4rem, 10vw, 7rem);
+  }
+
+  .eyebrow {
+    margin-bottom: 1rem;
+    color: var(--colour-accent-bright);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    margin-bottom: 1.5rem;
+  }
+
+  .introduction {
+    font-size: clamp(1.05rem, 2vw, 1.3rem);
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    overflow: hidden;
+    border: 1px solid var(--colour-border);
+    border-radius: 0.5rem;
+    background: var(--colour-border);
+  }
+
+  article {
+    min-height: 18rem;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    background: var(--colour-surface);
+  }
+
+  article span {
+    display: block;
+    margin-bottom: 3rem;
+    color: var(--colour-accent);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 0.9rem;
+  }
+
+  article h2 {
+    margin-bottom: 1rem;
+    font-size: clamp(1.6rem, 3vw, 2.25rem);
+  }
+
+  article p {
+    margin-bottom: 0;
+  }
+
+  .privacy {
+    margin-top: clamp(4rem, 10vw, 7rem);
+    padding: clamp(2rem, 5vw, 4rem);
+    border: 1px solid var(--colour-border);
+    border-radius: 0.5rem;
+    background: var(--colour-surface);
+  }
+
+  .privacy h2 {
+    max-width: 15ch;
+    margin-bottom: 1.25rem;
+  }
+
+  .privacy p:last-child {
+    margin-bottom: 0;
+  }
+
+  @media (max-width: 42rem) {
+    .steps {
+      grid-template-columns: 1fr;
+    }
+
+    article {
+      min-height: auto;
+    }
+
+    article span {
+      margin-bottom: 2rem;
+    }
+  }
+</style>

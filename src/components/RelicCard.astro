@@ -1,0 +1,126 @@
+---
+import type { Relic } from "../data/relics";
+import { getCivilisation } from "../data/civilisations";
+
+interface Props {
+  relic: Relic;
+}
+
+const { relic } = Astro.props;
+const civilisation = getCivilisation(relic.civilisationSlug);
+
+const rarityLabels: Record<Relic["rarity"], string> = {
+  common: "Common",
+  uncommon: "Uncommon",
+  rare: "Rare",
+  centrepiece: "Centrepiece",
+};
+---
+
+<a
+  class={`relic-card rarity-${relic.rarity}`}
+  href={`/archive/relics/${relic.slug}`}
+>
+  <div class="artwork-placeholder" aria-hidden="true">
+    <span>{String(relic.collectionNumber).padStart(2, "0")}</span>
+  </div>
+
+  <div class="relic-information">
+    <p class="civilisation">
+      {civilisation?.name ?? "Unknown civilisation"}
+    </p>
+
+    <h3>{relic.name}</h3>
+
+    <div class="metadata">
+      <span>{rarityLabels[relic.rarity]}</span>
+      <span>{relic.category}</span>
+    </div>
+  </div>
+</a>
+
+<style>
+  .relic-card {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--colour-border);
+    border-radius: 0.5rem;
+    background: var(--colour-surface);
+    transition:
+      transform 160ms ease,
+      border-color 160ms ease,
+      background 160ms ease;
+  }
+
+  .relic-card:hover {
+    transform: translateY(-0.25rem);
+    border-color: var(--colour-accent);
+    background: var(--colour-surface-raised);
+  }
+
+  .artwork-placeholder {
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    border-bottom: 1px solid var(--colour-border);
+    background:
+      radial-gradient(
+        circle at 50% 45%,
+        rgba(202, 169, 104, 0.14),
+        transparent 55%
+      ),
+      var(--colour-background);
+  }
+
+  .artwork-placeholder span {
+    color: rgba(226, 201, 143, 0.32);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(3rem, 8vw, 5rem);
+  }
+
+  .relic-information {
+    padding: 1.25rem;
+  }
+
+  .civilisation {
+    margin-bottom: 0.5rem;
+    color: var(--colour-accent);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  h3 {
+    margin-bottom: 1.5rem;
+    font-size: 1.35rem;
+  }
+
+  .metadata {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .metadata span {
+    padding: 0.3rem 0.55rem;
+    border: 1px solid var(--colour-border);
+    border-radius: 999px;
+    color: var(--colour-text-muted);
+    font-size: 0.7rem;
+  }
+
+  .rarity-uncommon {
+    border-color: rgba(202, 169, 104, 0.45);
+  }
+
+  .rarity-rare {
+    border-color: rgba(226, 201, 143, 0.7);
+  }
+
+  .rarity-centrepiece {
+    border-color: var(--colour-accent-bright);
+    box-shadow: 0 0 2.5rem rgba(202, 169, 104, 0.1);
+  }
+</style>
