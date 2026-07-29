@@ -22,34 +22,34 @@ interface Props {
 
 const { civilisation } = Astro.props;
 const civilisationRelics = getRelicsForCivilisation(civilisation.slug);
+const archiveStatus =
+  civilisationRelics.length === civilisation.relicCount
+    ? "Complete"
+    : `${civilisationRelics.length} of ${civilisation.relicCount} catalogued`;
 ---
 
 <BaseLayout
   title={`${civilisation.name} | The Relicbound Archive`}
   description={`${civilisation.theme}. Explore its history, route environments and relic collection.`}
 >
-  <a class="back-link" href="/archive">← Return to the Archive</a>
+  <a class='back-link' href='/archive'>← Return to the Archive</a>
 
-  <section class="hero">
-    <p class="eyebrow">Lost civilisation</p>
+  <section class='hero'>
+    <p class='eyebrow'>Lost civilisation</p>
 
     <h1>{civilisation.name}</h1>
 
-    <p class="theme">{civilisation.theme}</p>
+    <p class='theme'>{civilisation.theme}</p>
   </section>
 
-  <section class="record">
-    <div class="history">
-      <p class="eyebrow">Known history</p>
+  <section class='record'>
+    <div class='history'>
+      <p class='eyebrow'>Known history</p>
 
-      {
-        civilisation.introduction.map((paragraph) => (
-          <p>{paragraph}</p>
-        ))
-      }
+      {civilisation.introduction.map((paragraph) => <p>{paragraph}</p>)}
     </div>
 
-    <dl class="collection-summary">
+    <dl class='collection-summary'>
       <div>
         <dt>Relics</dt>
         <dd>{civilisation.relicCount}</dd>
@@ -62,14 +62,14 @@ const civilisationRelics = getRelicsForCivilisation(civilisation.slug);
 
       <div>
         <dt>Archive status</dt>
-        <dd>In reconstruction</dd>
+        <dd>{archiveStatus}</dd>
       </div>
     </dl>
   </section>
 
-  <section class="environments">
-    <div class="section-heading">
-      <p class="eyebrow">Route affinity</p>
+  <section class='environments'>
+    <div class='section-heading'>
+      <p class='eyebrow'>Route affinity</p>
       <h2>Where traces are most often recovered</h2>
       <p>
         Expeditions passing through these environments are more likely to
