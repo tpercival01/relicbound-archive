@@ -9,14 +9,41 @@ interface Props {
 }
 
 const { civilisationName, expectedRelicCount, relics } = Astro.props;
+
 const isComplete = relics.length === expectedRelicCount;
+
+const categoryOptions = [
+  ...new Set(relics.map((relic) => relic.category)),
+].sort((first, second) => first.localeCompare(second));
+
+const rarityOrder: Relic["rarity"][] = [
+  "common",
+  "uncommon",
+  "rare",
+  "centrepiece",
+];
+
+const rarityOptions = rarityOrder.filter((rarity) =>
+  relics.some((relic) => relic.rarity === rarity),
+);
+
+const rarityLabels: Record<Relic["rarity"], string> = {
+  common: "Common",
+  uncommon: "Uncommon",
+  rare: "Rare",
+  centrepiece: "Centrepiece",
+};
 ---
 
-<section class='collection' aria-labelledby='collection-heading'>
-  <div class='section-heading'>
-    <p class='eyebrow'>Collection catalogue</p>
+<section
+  class="collection"
+  aria-labelledby="collection-heading"
+  data-relic-catalogue
+>
+  <div class="section-heading">
+    <p class="eyebrow">Collection catalogue</p>
 
-    <h2 id='collection-heading'>
+    <h2 id="collection-heading">
       {expectedRelicCount} relic records
     </h2>
 
@@ -41,23 +68,286 @@ const isComplete = relics.length === expectedRelicCount;
 
   {
     relics.length > 0 ? (
-      <div class='relic-grid'>
-        {relics.map((relic) => (
-          <RelicCard relic={relic} />
-        ))}
-      </div>
+      <>
+        <div class="catalogue-tools" aria-label="Relic catalogue controls">
+          <div class="search-control">
+            <label for="relic-search">Search this collection</label>
+
+            <input
+              id="relic-search"
+              type="search"
+              placeholder="Search by relic name or category"
+              autocomplete="off"
+              data-relic-search
+            />
+          </div>
+
+          <div class="select-control">
+            <label for="relic-rarity">Rarity</label>
+
+            <select id="relic-rarity" data-relic-rarity>
+              <option value="all">All rarities</option>
+
+              {rarityOptions.map((rarity) => (
+                <option value={rarity}>{rarityLabels[rarity]}</option>
+              ))}
+            </select>
+          </div>
+
+          <div class="select-control">
+            <label for="relic-category">Category</label>
+
+            <select id="relic-category" data-relic-category>
+              <option value="all">All categories</option>
+
+              {categoryOptions.map((category) => (
+                <option value={category.toLowerCase()}>{category}</option>
+              ))}
+            </select>
+          </div>
+
+          <div class="select-control">
+            <label for="relic-sort">Sort</label>
+
+            <select id="relic-sort" data-relic-sort>
+              <option value="collection-ascending">
+                Collection number
+              </option>
+
+              <option value="collection-descending">
+                Collection number, descending
+              </option>
+
+              <option value="name-ascending">
+                Name, A–Z
+              </option>
+
+              <option value="rarity-descending">
+                Rarity, highest first
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="catalogue-status" aria-live="polite">
+          <span data-visible-count>{relics.length}</span>
+          {" "}
+          <span data-result-label>
+            {relics.length === 1 ? "record shown" : "records shown"}
+          </span>
+
+          <button type="button" class="clear-button" data-clear-filters hidden>
+            Clear filters
+          </button>
+        </div>
+
+        <div class="relic-grid" data-relic-grid>
+          {relics.map((relic) => (
+            <div
+              class="relic-grid-item"
+              data-relic-item
+              data-name={relic.name.toLowerCase()}
+              data-category={relic.category.toLowerCase()}
+              data-rarity={relic.rarity}
+              data-collection-number={relic.collectionNumber}
+            >
+              <RelicCard relic={relic} />
+            </div>
+          ))}
+        </div>
+
+        <div class="no-results" data-no-results hidden>
+          <strong>No matching relic records</strong>
+
+          <p>
+            Adjust the search term or clear the selected filters.
+          </p>
+        </div>
+      </>
     ) : (
-      <div class='empty-state'>
+      <div class="empty-state">
         <strong>Archive records awaiting import</strong>
 
         <p>
-          Individual relic entries will appear here when the shared catalogue is
-          imported from the canonical Relicbound dataset.
+          Individual relic entries will appear here when the shared catalogue
+          is imported from the canonical Relicbound dataset.
         </p>
       </div>
     )
   }
 </section>
+
+<script>
+  const catalogue = document.querySelector<HTMLElement>(
+    "[data-relic-catalogue]",
+  );
+
+  if (catalogue) {
+    const searchInput =
+      catalogue.querySelector<HTMLInputElement>("[data-relic-search]");
+
+    const raritySelect =
+      catalogue.querySelector<HTMLSelectElement>("[data-relic-rarity]");
+
+    const categorySelect =
+      catalogue.querySelector<HTMLSelectElement>("[data-relic-category]");
+
+    const sortSelect =
+      catalogue.querySelector<HTMLSelectElement>("[data-relic-sort]");
+
+    const grid =
+      catalogue.querySelector<HTMLElement>("[data-relic-grid]");
+
+    const visibleCount =
+      catalogue.querySelector<HTMLElement>("[data-visible-count]");
+
+    const resultLabel =
+      catalogue.querySelector<HTMLElement>("[data-result-label]");
+
+    const clearButton =
+      catalogue.querySelector<HTMLButtonElement>("[data-clear-filters]");
+
+    const noResults =
+      catalogue.querySelector<HTMLElement>("[data-no-results]");
+
+    const items = Array.from(
+      catalogue.querySelectorAll<HTMLElement>("[data-relic-item]"),
+    );
+
+    const rarityRank: Record<string, number> = {
+      common: 0,
+      uncommon: 1,
+      rare: 2,
+      centrepiece: 3,
+    };
+
+    function updateCatalogue() {
+      if (
+        !searchInput ||
+        !raritySelect ||
+        !categorySelect ||
+        !sortSelect ||
+        !grid ||
+        !visibleCount ||
+        !resultLabel ||
+        !clearButton ||
+        !noResults
+      ) {
+        return;
+      }
+
+      const searchTerm = searchInput.value.trim().toLowerCase();
+      const selectedRarity = raritySelect.value;
+      const selectedCategory = categorySelect.value;
+      const selectedSort = sortSelect.value;
+
+      const sortedItems = [...items].sort((first, second) => {
+        const firstNumber = Number(first.dataset.collectionNumber);
+        const secondNumber = Number(second.dataset.collectionNumber);
+
+        const firstName = first.dataset.name ?? "";
+        const secondName = second.dataset.name ?? "";
+
+        const firstRarity = rarityRank[first.dataset.rarity ?? ""] ?? 0;
+        const secondRarity = rarityRank[second.dataset.rarity ?? ""] ?? 0;
+
+        switch (selectedSort) {
+          case "collection-descending":
+            return secondNumber - firstNumber;
+
+          case "name-ascending":
+            return firstName.localeCompare(secondName);
+
+          case "rarity-descending":
+            return (
+              secondRarity - firstRarity ||
+              firstNumber - secondNumber
+            );
+
+          default:
+            return firstNumber - secondNumber;
+        }
+      });
+
+      sortedItems.forEach((item) => {
+        grid.append(item);
+      });
+
+      let matchingCount = 0;
+
+      items.forEach((item) => {
+        const name = item.dataset.name ?? "";
+        const category = item.dataset.category ?? "";
+        const rarity = item.dataset.rarity ?? "";
+
+        const matchesSearch =
+          searchTerm.length === 0 ||
+          name.includes(searchTerm) ||
+          category.includes(searchTerm);
+
+        const matchesRarity =
+          selectedRarity === "all" ||
+          rarity === selectedRarity;
+
+        const matchesCategory =
+          selectedCategory === "all" ||
+          category === selectedCategory;
+
+        const isMatch =
+          matchesSearch &&
+          matchesRarity &&
+          matchesCategory;
+
+        item.hidden = !isMatch;
+
+        if (isMatch) {
+          matchingCount += 1;
+        }
+      });
+
+      visibleCount.textContent = String(matchingCount);
+
+      resultLabel.textContent =
+        matchingCount === 1 ? "record shown" : "records shown";
+
+      noResults.hidden = matchingCount !== 0;
+
+      const hasActiveFilters =
+        searchTerm.length > 0 ||
+        selectedRarity !== "all" ||
+        selectedCategory !== "all" ||
+        selectedSort !== "collection-ascending";
+
+      clearButton.hidden = !hasActiveFilters;
+    }
+
+    searchInput?.addEventListener("input", updateCatalogue);
+    raritySelect?.addEventListener("change", updateCatalogue);
+    categorySelect?.addEventListener("change", updateCatalogue);
+    sortSelect?.addEventListener("change", updateCatalogue);
+
+    clearButton?.addEventListener("click", () => {
+      if (
+        !searchInput ||
+        !raritySelect ||
+        !categorySelect ||
+        !sortSelect
+      ) {
+        return;
+      }
+
+      searchInput.value = "";
+      raritySelect.value = "all";
+      categorySelect.value = "all";
+      sortSelect.value = "collection-ascending";
+
+      updateCatalogue();
+      searchInput.focus();
+    });
+
+    updateCatalogue();
+  }
+</script>
 
 <style>
   .collection {
@@ -82,20 +372,98 @@ const isComplete = relics.length === expectedRelicCount;
     margin-bottom: 1.25rem;
   }
 
+  .catalogue-tools {
+    display: grid;
+    grid-template-columns: minmax(15rem, 1.6fr) repeat(3, minmax(10rem, 1fr));
+    gap: 1rem;
+    padding: 1.25rem;
+    border: 1px solid var(--colour-border);
+    border-radius: 0.5rem;
+    background: var(--colour-surface);
+  }
+
+  .search-control,
+  .select-control {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .catalogue-tools label {
+    color: var(--colour-text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .catalogue-tools input,
+  .catalogue-tools select {
+    width: 100%;
+    min-height: 2.8rem;
+    padding: 0.7rem 0.8rem;
+    border: 1px solid var(--colour-border);
+    border-radius: 0.35rem;
+    background: var(--colour-background);
+    color: var(--colour-text);
+    font: inherit;
+  }
+
+  .catalogue-tools input:focus,
+  .catalogue-tools select:focus {
+    border-color: var(--colour-accent-bright);
+    outline: 2px solid transparent;
+    box-shadow: 0 0 0 2px var(--colour-accent-bright);
+  }
+
+  .catalogue-status {
+    display: flex;
+    gap: 0.3rem;
+    align-items: center;
+    min-height: 2.75rem;
+    color: var(--colour-text-muted);
+    font-size: 0.9rem;
+  }
+
+  .clear-button {
+    margin-left: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--colour-accent-bright);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .clear-button:hover {
+    text-decoration: underline;
+  }
+
   .relic-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 1rem;
   }
 
-  .empty-state {
+  .relic-grid-item {
+    min-width: 0;
+  }
+
+  .relic-grid-item[hidden] {
+    display: none;
+  }
+
+  .empty-state,
+  .no-results {
     padding: clamp(2rem, 5vw, 4rem);
     border: 1px solid var(--colour-border);
     border-radius: 0.5rem;
     background: var(--colour-surface);
   }
 
-  .empty-state strong {
+  .empty-state strong,
+  .no-results strong {
     display: block;
     margin-bottom: 0.75rem;
     color: var(--colour-text);
@@ -103,13 +471,42 @@ const isComplete = relics.length === expectedRelicCount;
     font-size: clamp(1.25rem, 3vw, 1.75rem);
   }
 
-  .empty-state p {
+  .empty-state p,
+  .no-results p {
     margin-bottom: 0;
+  }
+
+  .no-results[hidden] {
+    display: none;
+  }
+
+  @media (max-width: 64rem) {
+    .catalogue-tools {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
   }
 
   @media (max-width: 54rem) {
     .relic-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 38rem) {
+    .catalogue-tools {
+      grid-template-columns: 1fr;
+    }
+
+    .catalogue-status {
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .clear-button {
+      width: 100%;
+      margin-top: 0.4rem;
+      margin-left: 0;
+      text-align: left;
     }
   }
 

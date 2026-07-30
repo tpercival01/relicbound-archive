@@ -5,21 +5,48 @@ import { getCivilisation } from "../../../data/civilisations";
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 
 export function getStaticPaths() {
-  return relics.map((relic) => ({
-    params: {
-      slug: relic.slug,
-    },
-    props: {
-      relic,
-    },
-  }));
+  return relics.map((relic) => {
+    const civilisationRelics = relics
+      .filter(
+        (candidate) =>
+          candidate.civilisationSlug === relic.civilisationSlug,
+      )
+      .sort(
+        (first, second) =>
+          first.collectionNumber - second.collectionNumber,
+      );
+
+    const currentIndex = civilisationRelics.findIndex(
+      (candidate) => candidate.id === relic.id,
+    );
+
+    return {
+      params: {
+        slug: relic.slug,
+      },
+      props: {
+        relic,
+        previousRelic:
+          currentIndex > 0
+            ? civilisationRelics[currentIndex - 1]
+            : undefined,
+        nextRelic:
+          currentIndex < civilisationRelics.length - 1
+            ? civilisationRelics[currentIndex + 1]
+            : undefined,
+      },
+    };
+  });
 }
 
 interface Props {
   relic: Relic;
+  previousRelic?: Relic;
+  nextRelic?: Relic;
 }
 
-const { relic } = Astro.props;
+const { relic, previousRelic, nextRelic } = Astro.props;
+
 const civilisation = getCivilisation(relic.civilisationSlug);
 
 const rarityLabels: Record<Relic["rarity"], string> = {
@@ -120,6 +147,41 @@ const hasExtendedArchive =
       </section>
     )
   }
+  <nav class="relic-navigation" aria-label="Relic record navigation">
+    {
+      previousRelic ? (
+        <a
+          class="relic-navigation-link previous"
+          href={`/archive/relics/${previousRelic.slug}`}
+        >
+          <span class="navigation-direction">← Previous record</span>
+          <strong>
+            {String(previousRelic.collectionNumber).padStart(2, "0")} ·{" "}
+            {previousRelic.name}
+          </strong>
+        </a>
+      ) : (
+        <span class="relic-navigation-spacer" aria-hidden="true"></span>
+      )
+    }
+
+    {
+      nextRelic ? (
+        <a
+          class="relic-navigation-link next"
+          href={`/archive/relics/${nextRelic.slug}`}
+        >
+          <span class="navigation-direction">Next record →</span>
+          <strong>
+            {String(nextRelic.collectionNumber).padStart(2, "0")} ·{" "}
+            {nextRelic.name}
+          </strong>
+        </a>
+      ) : (
+        <span class="relic-navigation-spacer" aria-hidden="true"></span>
+      )
+    }
+  </nav>
 </BaseLayout>
 
 <style>
@@ -258,6 +320,66 @@ const hasExtendedArchive =
 
   .route-hint p:last-child {
     margin-bottom: 0;
+  }
+    .relic-navigation {
+    margin-top: clamp(5rem, 12vw, 9rem);
+    padding-top: 2rem;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    border-top: 1px solid var(--colour-border);
+  }
+
+  .relic-navigation-link {
+    min-width: 0;
+    padding: 1.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    border: 1px solid var(--colour-border);
+    border-radius: 0.5rem;
+    background: var(--colour-surface);
+    transition:
+      border-color 160ms ease,
+      transform 160ms ease;
+  }
+
+  .relic-navigation-link:hover {
+    border-color: var(--colour-accent-bright);
+    transform: translateY(-2px);
+  }
+
+  .relic-navigation-link.next {
+    text-align: right;
+  }
+
+  .navigation-direction {
+    color: var(--colour-text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .relic-navigation-link strong {
+    overflow-wrap: anywhere;
+    color: var(--colour-text);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(1rem, 2vw, 1.2rem);
+  }
+
+  @media (max-width: 38rem) {
+    .relic-navigation {
+      grid-template-columns: 1fr;
+    }
+
+    .relic-navigation-spacer {
+      display: none;
+    }
+
+    .relic-navigation-link.next {
+      text-align: left;
+    }
   }
 
   @media (max-width: 48rem) {
