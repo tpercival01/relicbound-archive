@@ -1,11 +1,45 @@
 ---
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import { civilisations } from "../../data/civilisations";
+import { relics } from "../../data/relics";
+
+const totalRelicCount = civilisations.reduce(
+  (total, civilisation) => total + civilisation.relicCount,
+  0,
+);
+
+const totalCentrepieceCount = civilisations.reduce(
+  (total, civilisation) => total + civilisation.centrepieceCount,
+  0,
+);
+
+const cataloguedRelicCount = relics.length;
+
+const catalogueProgress = Math.round(
+  (cataloguedRelicCount / totalRelicCount) * 100,
+);
+
+const civilisationCollections = civilisations.map((civilisation, index) => {
+  const availableRelics = relics.filter(
+    (relic) => relic.civilisationSlug === civilisation.slug,
+  );
+
+  return {
+    civilisation,
+    collectionNumber: index + 1,
+    availableCount: availableRelics.length,
+    isComplete: availableRelics.length === civilisation.relicCount,
+  };
+});
+
+const completedCollectionCount = civilisationCollections.filter(
+  (collection) => collection.isComplete,
+).length;
 ---
 
 <BaseLayout
   title="The Relicbound Archive"
-  description="Explore the lost civilisations and relics catalogued through Relicbound expeditions."
+  description="Explore the lost civilisations and relic records catalogued through Relicbound expeditions."
 >
   <section class="page-header">
     <p class="eyebrow">Public collection catalogue</p>
@@ -20,18 +54,48 @@ import { civilisations } from "../../data/civilisations";
 
   <section class="summary" aria-label="Archive summary">
     <div>
-      <strong>105</strong>
-      <span>Relics</span>
+      <strong>{cataloguedRelicCount}</strong>
+      <span>Records online</span>
     </div>
 
     <div>
-      <strong>4</strong>
+      <strong>{totalRelicCount}</strong>
+      <span>Planned relics</span>
+    </div>
+
+    <div>
+      <strong>{civilisations.length}</strong>
       <span>Civilisations</span>
     </div>
 
     <div>
-      <strong>9</strong>
-      <span>Centrepieces</span>
+      <strong>{totalCentrepieceCount}</strong>
+      <span>Centrepieces planned</span>
+    </div>
+  </section>
+
+  <section class="catalogue-progress" aria-labelledby="progress-heading">
+    <div class="progress-copy">
+      <div>
+        <p class="eyebrow">Catalogue progress</p>
+
+        <h2 id="progress-heading">
+          {cataloguedRelicCount} of {totalRelicCount} records restored
+        </h2>
+      </div>
+
+      <strong>{catalogueProgress}%</strong>
+    </div>
+
+    <div
+      class="progress-track"
+      role="progressbar"
+      aria-label="Archive catalogue progress"
+      aria-valuemin="0"
+      aria-valuemax={totalRelicCount}
+      aria-valuenow={cataloguedRelicCount}
+    >
+      <span style={`width: ${catalogueProgress}%`}></span>
     </div>
   </section>
 
@@ -43,24 +107,46 @@ import { civilisations } from "../../data/civilisations";
 
     <div class="civilisation-grid">
       {
-        civilisations.map((civilisation, index) => (
-          <a
-            class="civilisation-card"
-            href={`/archive/civilisations/${civilisation.slug}`}
-          >
-            <span class="collection-number">
-              Collection {String(index + 1).padStart(2, "0")}
-            </span>
+        civilisationCollections.map(
+          ({
+            civilisation,
+            collectionNumber,
+            availableCount,
+            isComplete,
+          }) => (
+            <a
+              class="civilisation-card"
+              href={`/archive/civilisations/${civilisation.slug}`}
+            >
+              <div class="card-heading">
+                <span class="collection-number">
+                  Collection {String(collectionNumber).padStart(2, "0")}
+                </span>
 
-            <h3>{civilisation.name}</h3>
+                <span
+                  class:list={[
+                    "collection-status",
+                    { complete: isComplete },
+                  ]}
+                >
+                  {isComplete ? "Complete" : "In reconstruction"}
+                </span>
+              </div>
 
-            <p>{civilisation.theme}</p>
+              <h3>{civilisation.name}</h3>
 
-            <span class="relic-count">
-              {civilisation.relicCount} relics
-            </span>
-          </a>
-        ))
+              <p>{civilisation.theme}</p>
+
+              <div class="card-footer">
+                <span class="relic-count">
+                  {availableCount} of {civilisation.relicCount} records
+                </span>
+
+                <span aria-hidden="true">View collection →</span>
+              </div>
+            </a>
+          ),
+        )
       }
     </div>
   </section>
@@ -68,14 +154,25 @@ import { civilisations } from "../../data/civilisations";
   <section class="archive-note">
     <div>
       <p class="eyebrow">Archive status</p>
-      <h2>The catalogue is still being reconstructed.</h2>
+
+      <h2>
+        {completedCollectionCount === 1
+          ? "The first collection is complete."
+          : `${completedCollectionCount} collections are complete.`}
+      </h2>
     </div>
 
-    <p>
-      Individual relic entries, restoration records and historical
-      interpretations will be added as the museum catalogue is prepared for
-      launch.
-    </p>
+    <div>
+      <p>
+        All Tideborn relic records are now available in the public archive.
+        Remaining collections will open as their canonical museum data is
+        completed.
+      </p>
+
+      <a href="/archive/civilisations/tideborn">
+        Explore the complete Tideborn collection →
+      </a>
+    </div>
   </section>
 </BaseLayout>
 
@@ -103,14 +200,14 @@ import { civilisations } from "../../data/civilisations";
   }
 
   .summary {
-    margin-bottom: clamp(4rem, 10vw, 7rem);
+    margin-bottom: clamp(3rem, 8vw, 5rem);
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     border-block: 1px solid var(--colour-border);
   }
 
   .summary div {
-    padding: 1.5rem;
+    padding: 1.5rem 1rem;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -130,6 +227,52 @@ import { civilisations } from "../../data/civilisations";
   .summary span {
     color: var(--colour-text-muted);
     font-size: 0.85rem;
+  }
+
+  .catalogue-progress {
+    margin-bottom: clamp(4rem, 10vw, 7rem);
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    border: 1px solid var(--colour-border);
+    border-radius: 0.5rem;
+    background: var(--colour-surface);
+  }
+
+  .progress-copy {
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+
+  .progress-copy .eyebrow {
+    margin-bottom: 0.75rem;
+  }
+
+  .progress-copy h2 {
+    margin-bottom: 0;
+    font-size: clamp(1.5rem, 4vw, 2.25rem);
+  }
+
+  .progress-copy > strong {
+    flex: 0 0 auto;
+    color: var(--colour-accent-bright);
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+  }
+
+  .progress-track {
+    height: 0.5rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--colour-background);
+  }
+
+  .progress-track span {
+    height: 100%;
+    display: block;
+    border-radius: inherit;
+    background: var(--colour-accent-bright);
   }
 
   .section-heading {
@@ -163,8 +306,15 @@ import { civilisations } from "../../data/civilisations";
     background: var(--colour-surface-raised);
   }
 
-  .collection-number {
+  .card-heading {
     margin-bottom: auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .collection-number {
     color: var(--colour-accent);
     font-size: 0.75rem;
     font-weight: 700;
@@ -172,19 +322,49 @@ import { civilisations } from "../../data/civilisations";
     text-transform: uppercase;
   }
 
+  .collection-status {
+    padding: 0.35rem 0.55rem;
+    border: 1px solid var(--colour-border);
+    border-radius: 999px;
+    color: var(--colour-text-muted);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .collection-status.complete {
+    border-color: var(--colour-accent);
+    color: var(--colour-accent-bright);
+  }
+
   .civilisation-card h3 {
     margin: 3rem 0 1rem;
     font-size: clamp(1.75rem, 4vw, 2.75rem);
   }
 
-  .civilisation-card p {
+  .civilisation-card > p {
     margin-bottom: 2rem;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
   }
 
   .relic-count {
     color: var(--colour-text);
     font-size: 0.85rem;
     font-weight: 700;
+  }
+
+  .card-footer span:last-child {
+    color: var(--colour-text-muted);
+    font-size: 0.8rem;
+    text-align: right;
   }
 
   .archive-note {
@@ -203,16 +383,35 @@ import { civilisations } from "../../data/civilisations";
     margin-bottom: 0;
   }
 
+  .archive-note a {
+    margin-top: 1.25rem;
+    display: inline-flex;
+    color: var(--colour-accent-bright);
+    font-weight: 700;
+  }
+
+  .archive-note a:hover {
+    text-decoration: underline;
+  }
+
+  @media (max-width: 52rem) {
+    .summary {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .summary div:nth-child(3) {
+      border-left: 0;
+    }
+
+    .summary div:nth-child(n + 3) {
+      border-top: 1px solid var(--colour-border);
+    }
+  }
+
   @media (max-width: 42rem) {
-    .summary,
     .civilisation-grid,
     .archive-note {
       grid-template-columns: 1fr;
-    }
-
-    .summary div + div {
-      border-top: 1px solid var(--colour-border);
-      border-left: 0;
     }
 
     .civilisation-card {
@@ -221,6 +420,33 @@ import { civilisations } from "../../data/civilisations";
 
     .archive-note {
       gap: 1.5rem;
+    }
+
+    .progress-copy {
+      align-items: flex-start;
+    }
+  }
+
+  @media (max-width: 34rem) {
+    .summary {
+      grid-template-columns: 1fr;
+    }
+
+    .summary div + div,
+    .summary div:nth-child(3) {
+      border-top: 1px solid var(--colour-border);
+      border-left: 0;
+    }
+
+    .progress-copy,
+    .card-heading,
+    .card-footer {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .card-footer span:last-child {
+      text-align: left;
     }
   }
 </style>

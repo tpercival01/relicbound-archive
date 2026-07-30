@@ -118,8 +118,11 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     <section>
       <h2>Contact</h2>
       <p>
-        Developer and support contact information will be added before the
-        external TestFlight release.
+        Questions about this privacy policy or Relicbound’s data practices can be
+        sent to{" "}
+        <a href="mailto:relicbound@thomaspercival.dev">
+          relicbound@thomaspercival.dev
+        </a>.
       </p>
     </section>
   </article>
@@ -137,6 +140,16 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     padding: 0;
     display: block;
     border: 0;
+  }
+
+  .policy a {
+    color: var(--colour-accent-bright);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+
+  .policy a:hover {
+    text-decoration: underline;
   }
 
   .eyebrow {

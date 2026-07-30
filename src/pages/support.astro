@@ -94,8 +94,14 @@ const questions = [
 
     <div>
       <p>
-        The public support email address will be added before the external
-        TestFlight release.
+        Email us at{" "}
+        <a
+          class="support-email"
+          href="mailto:relicbound@thomaspercival.dev?subject=Relicbound%20Support"
+        >
+          relicbound@thomaspercival.dev
+        </a>{" "}
+        for help with the application or to report a problem.
       </p>
 
       <p>When reporting an expedition problem, include:</p>
@@ -127,6 +133,15 @@ const questions = [
   .page-header {
     max-width: 52rem;
     margin-bottom: clamp(4rem, 10vw, 7rem);
+  }
+  .support-email {
+    color: var(--colour-accent-bright);
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+
+  .support-email:hover {
+    text-decoration: underline;
   }
 
   .eyebrow {

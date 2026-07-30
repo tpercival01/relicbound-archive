@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://relicbound.thomaspercival.dev/sitemap-index.xml

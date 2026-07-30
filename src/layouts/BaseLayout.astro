@@ -10,6 +10,11 @@ const {
   title,
   description = "Relicbound chooses nearby walking expeditions and turns completed routes into a persistent museum collection.",
 } = Astro.props;
+
+const canonicalURL = new URL(
+  Astro.url.pathname,
+  Astro.site ?? Astro.url,
+).href;
 ---
 
 <!doctype html>
@@ -17,15 +22,32 @@ const {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <meta name="description" content={description} />
-    <meta name="generator" content={Astro.generator} />
 
     <title>{title}</title>
+
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#101413" />
+
+    <link rel="canonical" href={canonicalURL} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Relicbound" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalURL} />
+
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
   </head>
 
   <body>
     <header>
-      <a class="wordmark" href="/">Relicbound</a>
+      <a class="wordmark" href="/" aria-label="Relicbound home">
+        Relicbound
+      </a>
 
       <nav aria-label="Main navigation">
         <a href="/how-it-works">How It Works</a>
